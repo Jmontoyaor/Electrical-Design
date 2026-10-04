@@ -14,6 +14,8 @@ Portafolio de proyectos de ingeniería eléctrica, organizado en una carpeta por
 - [`electrical-engineering-integrative-workshop/`](electrical-engineering-integrative-workshop) —
   Taller Integrador de Ingeniería Eléctrica: verificación del flujo de cargas
   (DIgSILENT PowerFactory) de la subestación de 75 kVA.
+- [`power-systems-analysis/`](power-systems-analysis) — análisis de sistemas de
+  potencia (carpeta nueva, en inglés; sin repositorio de origen todavía).
 
 Las carpetas `distribution-systems`, `power-transmission-systems` y
 `electrical-system-design-AUTOCAD` se incorporaron con `git subtree` a partir de
