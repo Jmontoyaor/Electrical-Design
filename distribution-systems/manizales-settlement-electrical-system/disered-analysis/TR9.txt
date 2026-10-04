@@ -1,0 +1,67 @@
+
+                        Á R E A    D E    D I S T R I B U C I Ó N
+                       PROGRAMA DE DISEÑO DE REDES DE DISTRIBUCION
+                        INFORMACION DE LINEAS CIRCUITO "ANALISIS"
+
+                             DE     A      CALIBRE    TRAMO(m)
+
+                             1     2       TRIP 2       9
+                             1     3       TRIP 2      17
+                             3     4       TRIP 2      20
+                             1     5       TRIP 2      26
+                             5     6       TRIP 2      10
+                             6     7       TRIP 2       6
+                             1     8       TRIP 2      16
+                             8     9       TRIP 2      12
+                             9    10       TRIP 2      36
+                            10    11       TRIP 2      25
+
+
+
+                                   INFORMACION DE NODOS
+
+                                NODO    No.USUARIOS    KVA
+
+                                1          3         3,270
+                                2          3         3,270
+                                3          5         4,850
+                                4          7         6,230
+                                5          3         3,270
+                                6          1         1,350
+                                7          5         4,850
+                                8          5         4,850
+                                9          5         4,850
+                               10          5         4,850
+                               11          3         3,270
+
+
+
+                                INFORMACION DE RESULTADOS
+
+             ND  ND  FLUJO P   FLUJO Q   VOL.   PPERD.  QPERD.   CTE    REG.
+                       (kW)     (kVAR)   (V)     (kW)   (kVAR)   (A)    (%)
+
+
+              1   2    3,109    1,021   239,77  0,003   0,000   13,64   0,10
+              1   3   10,624    3,470   238,50  0,071   0,008   46,57   0,62
+              3   4    5,944    1,948   237,51  0,026   0,003   26,23   1,04
+              1   5    9,093    2,967   238,04  0,079   0,008   39,85   0,82
+              5   6    5,909    1,938   237,55  0,013   0,001   26,12   1,02
+              6   7    4,614    1,515   237,31  0,005   0,001   20,44   1,12
+              1   8   17,267    5,600   237,71  0,176   0,019   75,64   0,95
+              8   9   12,487    4,068   236,46  0,070   0,007   55,25   1,48
+              9  10    7,808    2,546   234,09  0,083   0,009   34,73   2,46
+             10  11    3,116    1,022   233,43  0,009   0,001   14,01   2,74
+
+
+
+         TENSION FUENTE:           240,0 V         FACTOR DE POTENCIA:          0,95
+         LONGITUD RED:             177,0 m         USUARIOS INSTALADOS:        45
+         ESTRATO:                    1             kVA DEMANDA DIVERS PROM:     0,998
+         MAX REG:                    2,74          NODO:                        11
+
+
+         PERDIDAS DE POTENCIA:   0,5372 kW y  0,0572 kVAR
+         CAPACIDAD DEMANDADA PARA TRANSFORMADOR 8 AÑOS:    18,45 kVA
+
+

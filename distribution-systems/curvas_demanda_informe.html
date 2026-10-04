@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curvas de Demanda Eléctrica — Empresa 1 y Empresa 2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --blue: #2563eb; --blue-light: #dbeafe; --blue-dark: #1e40af;
+    --red: #dc2626; --red-light: #fee2e2; --red-dark: #991b1b;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+    --gray-400: #9ca3af; --gray-600: #4b5563; --gray-800: #1f2937; --gray-900: #111827;
+    --green: #16a34a; --green-light: #dcfce7;
+    --amber: #d97706; --amber-light: #fef3c7;
+    --purple: #7c3aed; --purple-light: #ede9fe;
+    --radius: 8px; --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; line-height: 1.6; color: var(--gray-800); background: var(--gray-50); }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--gray-200); padding: 0 2rem; display: flex; align-items: center; gap: 0; box-shadow: var(--shadow); }
+  .nav-brand { font-weight: 600; font-size: 14px; color: var(--gray-900); padding: 1rem 1rem 1rem 0; border-right: 1px solid var(--gray-200); margin-right: .5rem; white-space: nowrap; }
+  nav a { font-size: 13px; color: var(--gray-600); text-decoration: none; padding: .9rem .75rem; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; white-space: nowrap; }
+  nav a:hover { color: var(--blue); border-bottom-color: var(--blue-light); }
+  nav a.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 500; }
+
+  /* LAYOUT */
+  .page { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+  section { margin-bottom: 3.5rem; }
+  .section-header { margin-bottom: 1.5rem; padding-bottom: .875rem; border-bottom: 1px solid var(--gray-200); }
+  .section-num { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--blue); margin-bottom: .25rem; }
+  h1 { font-size: 28px; font-weight: 700; color: var(--gray-900); line-height: 1.2; }
+  h2 { font-size: 20px; font-weight: 600; color: var(--gray-900); }
+  h3 { font-size: 16px; font-weight: 600; color: var(--gray-800); margin-bottom: .75rem; }
+  p { color: var(--gray-600); margin-bottom: .875rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%); color: #fff; padding: 3rem 2.5rem; border-radius: var(--radius-lg); margin-bottom: 2.5rem; }
+  .hero-badge { display: inline-block; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 20px; font-size: 12px; font-weight: 500; padding: 3px 12px; margin-bottom: 1rem; letter-spacing: .04em; }
+  .hero h1 { color: #fff; font-size: 32px; margin-bottom: .625rem; }
+  .hero p { color: rgba(255,255,255,.8); font-size: 15px; margin-bottom: 0; }
+  .hero-meta { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .hero-meta-item { font-size: 13px; color: rgba(255,255,255,.7); }
+  .hero-meta-item strong { color: #fff; font-weight: 500; display: block; font-size: 14px; }
+
+  /* CARDS */
+  .card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow); }
+  .card-sm { padding: 1.125rem 1.25rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+  .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .875rem; }
+
+  /* METRIC CARDS */
+  .metric { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 1rem 1.125rem; }
+  .metric-label { font-size: 12px; color: var(--gray-400); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .375rem; }
+  .metric-value { font-size: 24px; font-weight: 700; color: var(--gray-900); line-height: 1; }
+  .metric-sub { font-size: 12px; color: var(--gray-400); margin-top: .25rem; }
+  .metric.blue { border-left: 3px solid var(--blue); }
+  .metric.red { border-left: 3px solid var(--red); }
+  .metric.green { border-left: 3px solid var(--green); }
+  .metric.amber { border-left: 3px solid var(--amber); }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-blue { background: var(--blue-light); color: var(--blue-dark); }
+  .badge-red { background: var(--red-light); color: var(--red-dark); }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-purple { background: var(--purple-light); color: var(--purple); }
+
+  /* TABS */
+  .tab-bar { display: flex; gap: 4px; background: var(--gray-100); border-radius: var(--radius); padding: 4px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .tab-btn { font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 6px; border: none; background: transparent; color: var(--gray-600); cursor: pointer; transition: all .15s; }
+  .tab-btn:hover { background: var(--gray-200); color: var(--gray-800); }
+  .tab-btn.active { background: #fff; color: var(--blue); box-shadow: var(--shadow); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* CHART */
+  .chart-container { position: relative; width: 100%; }
+  .legend { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: .875rem; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-600); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th { background: var(--gray-50); font-weight: 600; color: var(--gray-700); padding: .625rem 1rem; text-align: left; border-bottom: 2px solid var(--gray-200); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  tbody td { padding: .625rem 1rem; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--gray-50); }
+  .td-num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .td-label { font-weight: 500; color: var(--gray-900); }
+
+  /* ALERT */
+  .alert { border-radius: var(--radius); padding: 1rem 1.125rem; font-size: 14px; line-height: 1.6; display: flex; gap: .75rem; align-items: flex-start; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-blue { background: var(--blue-light); border: 1px solid #bfdbfe; color: var(--blue-dark); }
+  .alert-amber { background: var(--amber-light); border: 1px solid #fde68a; color: #92400e; }
+  .alert-green { background: var(--green-light); border: 1px solid #bbf7d0; color: #14532d; }
+  .alert-red { background: var(--red-light); border: 1px solid #fecaca; color: var(--red-dark); }
+  .alert strong { font-weight: 600; }
+
+  /* FORMULA */
+  .formula-box { background: var(--gray-900); color: #e2e8f0; border-radius: var(--radius); padding: 1rem 1.25rem; font-family: 'Courier New', monospace; font-size: 13.5px; line-height: 1.8; margin: .875rem 0; overflow-x: auto; }
+  .formula-box .comment { color: #6b7280; }
+  .formula-box .key { color: #93c5fd; }
+  .formula-box .val { color: #86efac; }
+
+  /* COMPANY HEADER */
+  .company-header { display: flex; align-items: center; gap: .875rem; margin-bottom: 1.25rem; }
+  .company-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .company-title { font-size: 17px; font-weight: 600; color: var(--gray-900); }
+  .company-sub { font-size: 13px; color: var(--gray-400); }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--gray-200); margin: 1.5rem 0; }
+
+  /* PROGRESS */
+  .progress-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+  .progress-label { font-size: 13px; color: var(--gray-600); width: 70px; }
+  .progress-track { flex: 1; height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+  .progress-val { font-size: 13px; font-weight: 600; color: var(--gray-900); width: 45px; text-align: right; }
+
+  /* COMPARISON TABLE HIGHLIGHT */
+  .highlight-blue td { background: #eff6ff !important; }
+  .highlight-red td { background: #fff5f5 !important; }
+
+  /* FOOTER */
+  footer { text-align: center; padding: 2rem; font-size: 12px; color: var(--gray-400); border-top: 1px solid var(--gray-200); margin-top: 2rem; }
+
+  /* PRINT */
+  @media print {
+    nav { display: none; }
+    .page { padding: 1rem; }
+    section { page-break-inside: avoid; }
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 2rem 1.5rem; }
+    .hero h1 { font-size: 24px; }
+    nav { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <span class="nav-brand">⚡ Análisis de Demanda</span>
+  <a href="#metodologia" class="nav-link">Metodología</a>
+  <a href="#empresa1" class="nav-link">Empresa 1</a>
+  <a href="#empresa2" class="nav-link">Empresa 2</a>
+  <a href="#comparativa" class="nav-link">Comparativa</a>
+  <a href="#imprecisiones" class="nav-link">Imprecisiones</a>
+  <a href="#conclusiones" class="nav-link">Conclusiones</a>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">INGENIERÍA ELÉCTRICA</div>
+    <h1>Curvas de Demanda Eléctrica</h1>
+    <p>Determinación, estimación y análisis de las curvas de demanda horaria para dos empresas industriales/comerciales a partir de registros de medición 2012–2013.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>Período de análisis</strong>Oct 2012 – Oct 2013</div>
+      <div class="hero-meta-item"><strong>Observaciones</strong>9 504 registros horarios</div>
+      <div class="hero-meta-item"><strong>Variables</strong>kWh activa · kVArh reactiva</div>
+      <div class="hero-meta-item"><strong>Medidores</strong>Empresa 1 · Empresa 2</div>
+    </div>
+  </div>
+
+  <!-- 1. METODOLOGÍA -->
+  <section id="metodologia">
+    <div class="section-header">
+      <div class="section-num">Sección 1</div>
+      <h2>Metodología</h2>
+    </div>
+
+    <p>La curva de demanda es la representación gráfica del consumo de energía eléctrica en función del tiempo. Para determinarla se emplea el <strong>promedio aritmético por hora del día</strong> sobre el registro histórico completo, obteniendo así una curva media representativa del comportamiento central de cada empresa.</p>
+
+    <div class="card" style="margin: 1.25rem 0;">
+      <h3>Proceso metodológico</h3>
+      <div class="grid-4" style="margin-top: 1rem;">
+        <div style="text-align:center; padding: .5rem;">
+          <div style="width:48px;height:48px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:20px;font-weight:700;color:var(--blue);">1</div>
+          <div style="font-weight:600;font-size:13px;color:var(--gray-900);margin-bottom:.375rem;">Carga y limpieza</div>
+          <div style="font-size:12px;color:var(--gray-500);">Lectura del CSV, conversión de separadores decimales (coma → punto), descarte de filas no numéricas.</div>
+        </div>
+        <div style="text-align:center; padding: .5rem;">
+          <div style="width:48px;height:48px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:20px;font-weight:700;color:var(--blue);">2</div>
+          <div style="font-weight:600;font-size:13px;color:var(--gray-900);margin-bottom:.375rem;">Agrupación horaria</div>
+          <div style="font-size:12px;color:var(--gray-500);">Para cada hora h ∈ {0, 1, …, 23} se calculan media, desviación estándar y coeficiente de variación sobre todos los días del registro.</div>
+        </div>
+        <div style="text-align:center; padding: .5rem;">
+          <div style="width:48px;height:48px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:20px;font-weight:700;color:var(--blue);">3</div>
+          <div style="font-weight:600;font-size:13px;color:var(--gray-900);margin-bottom:.375rem;">Indicadores clave</div>
+          <div style="font-size:12px;color:var(--gray-500);">Factor de carga, relación pico-valle, factor de potencia y coeficiente de variación como métricas diagnósticas.</div>
+        </div>
+        <div style="text-align:center; padding: .5rem;">
+          <div style="width:48px;height:48px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:20px;font-weight:700;color:var(--blue);">4</div>
+          <div style="font-weight:600;font-size:13px;color:var(--gray-900);margin-bottom:.375rem;">Análisis de incertidumbre</div>
+          <div style="font-size:12px;color:var(--gray-500);">Evaluación de las fuentes de error y cuantificación de la variabilidad que afecta la estimación.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Fórmulas fundamentales</h3>
+    <div class="formula-box">
+<span class="comment">// Demanda media horaria (curva típica)</span>
+<span class="key">D̄(h)</span> = <span class="val">( 1/N ) · Σ D(h,d)</span>   para d = 1 … N días, h = 0 … 23 h
+
+<span class="comment">// Desviación estándar horaria</span>
+<span class="key">σ(h)</span>  = <span class="val">√[ (1/N) · Σ (D(h,d) − D̄(h))² ]</span>
+
+<span class="comment">// Coeficiente de variación (incertidumbre relativa)</span>
+<span class="key">CV(h)</span> = <span class="val">σ(h) / D̄(h)</span>    → 0 = perfecto, &gt;0.5 = alta variabilidad
+
+<span class="comment">// Factor de carga (eficiencia del uso de infraestructura)</span>
+<span class="key">FC</span>    = <span class="val">D̄_global / D_max</span>   → 1 = uso uniforme, bajo = picos bruscos
+
+<span class="comment">// Factor de potencia (calidad de la energía)</span>
+<span class="key">FP</span>    = <span class="val">kWh / √(kWh² + kVArh²)</span>   → ideal ≥ 0.97
+    </div>
+
+    <div class="alert alert-blue" style="margin-top:1rem;">
+      <span class="alert-icon">ℹ</span>
+      <div>La curva media anual es la <strong>estimación central</strong> del comportamiento típico. Sin embargo, al mezclar días laborales, festivos y distintas temporadas en un solo promedio, la curva real de cualquier día particular puede alejarse significativamente de esta estimación. El coeficiente de variación cuantifica esa incertidumbre hora por hora.</div>
+    </div>
+  </section>
+
+  <!-- 2. EMPRESA 1 -->
+  <section id="empresa1">
+    <div class="section-header">
+      <div class="section-num">Sección 2</div>
+      <h2>Curva de demanda — Empresa 1</h2>
+    </div>
+
+    <div class="company-header">
+      <div class="company-dot" style="background:var(--blue);"></div>
+      <div>
+        <div class="company-title">Medidor 1 · Empresa 1</div>
+        <div class="company-sub">Perfil: carga industrial / base continua</div>
+      </div>
+      <span class="badge badge-blue" style="margin-left:auto;">24/7 · Proceso continuo</span>
+    </div>
+
+    <!-- Métricas E1 -->
+    <div class="grid-6" style="margin-bottom:1.5rem;">
+      <div class="metric blue">
+        <div class="metric-label">Consumo promedio</div>
+        <div class="metric-value">490.8</div>
+        <div class="metric-sub">kWh/hora</div>
+      </div>
+      <div class="metric blue">
+        <div class="metric-label">Consumo máximo</div>
+        <div class="metric-value">1 040</div>
+        <div class="metric-sub">kWh registrado</div>
+      </div>
+      <div class="metric blue">
+        <div class="metric-label">Total acumulado</div>
+        <div class="metric-value">4.66</div>
+        <div class="metric-sub">GWh (2012–2013)</div>
+      </div>
+      <div class="metric green">
+        <div class="metric-label">Factor de carga</div>
+        <div class="metric-value">0.472</div>
+        <div class="metric-sub">FC = D̄ / D_max</div>
+      </div>
+      <div class="metric amber">
+        <div class="metric-label">Coef. variación</div>
+        <div class="metric-value">0.511</div>
+        <div class="metric-sub">Relativo / global</div>
+      </div>
+      <div class="metric green">
+        <div class="metric-label">Factor de potencia</div>
+        <div class="metric-value">0.965</div>
+        <div class="metric-sub">tan φ = 0.27</div>
+      </div>
+    </div>
+
+    <!-- Gráfico E1 con tabs -->
+    <div class="card">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('e1','curva')">Curva horaria media</button>
+        <button class="tab-btn" onclick="switchTab('e1','banda')">Banda de incertidumbre</button>
+        <button class="tab-btn" onclick="switchTab('e1','anual')">Comparativa anual</button>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div>Media horaria (D̄)</div>
+        <div class="legend-item" id="leg-e1-std" style="display:none;"><div class="legend-dot" style="background:#bfdbfe;border:1px dashed #2563eb;"></div>Banda ±1σ</div>
+        <div class="legend-item" id="leg-e1-2013" style="display:none;"><div class="legend-dot" style="background:#7c3aed;"></div>Año 2013</div>
+        <div class="legend-item" id="leg-e1-2012" style="display:none;"><div class="legend-dot" style="background:#2563eb;border:2px dashed;"></div>Año 2012</div>
+      </div>
+      <div id="e1-curva" class="tab-pane active">
+        <div class="chart-container" style="height:300px;"><canvas id="chartE1Curva" role="img" aria-label="Curva de demanda horaria media Empresa 1"></canvas></div>
+      </div>
+      <div id="e1-banda" class="tab-pane">
+        <div class="chart-container" style="height:300px;"><canvas id="chartE1Banda" role="img" aria-label="Banda de incertidumbre ±1σ Empresa 1"></canvas></div>
+      </div>
+      <div id="e1-anual" class="tab-pane">
+        <div class="chart-container" style="height:300px;"><canvas id="chartE1Anual" role="img" aria-label="Comparativa curva horaria 2012 vs 2013 Empresa 1"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Análisis cualitativo E1 -->
+    <div class="grid-2" style="margin-top:1.25rem;">
+      <div class="card card-sm">
+        <h3>Características del perfil de carga</h3>
+        <p>La curva presenta una <strong>forma casi plana</strong> con una diferencia pico-valle de apenas <strong>14.4 %</strong> (pico: 527 kWh a las 11h; valle: 451 kWh a las 5h). Esto es la firma característica de una <em>planta que opera en turnos continuos o 24/7</em>: la demanda nocturna se mantiene elevada (~470 kWh) sin caídas significativas.</p>
+        <p>Las horas de mayor consumo se concentran entre las 8h y las 17h con un suave plateau, lo que puede asociarse a un turno administrativo superpuesto sobre la producción base.</p>
+        <table style="margin-top:.5rem;width:100%;font-size:13px;">
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Hora pico</td><td style="text-align:right;font-weight:600;">11:00 h → 527.1 kWh</td></tr>
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Hora valle</td><td style="text-align:right;font-weight:600;">05:00 h → 451.0 kWh</td></tr>
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Relación pico/valle</td><td style="text-align:right;font-weight:600;">+14.4 %</td></tr>
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Registros en cero</td><td style="text-align:right;font-weight:600;">22 horas (paradas)</td></tr>
+        </table>
+      </div>
+      <div class="card card-sm">
+        <h3>Calidad de la energía demandada</h3>
+        <p>El <strong>factor de potencia (FP = 0.965)</strong> es el mejor indicador de la calidad de la demanda de esta empresa. Con tan(φ) = 0.27, el consumo de energía reactiva es moderado y se encuentra <em>cerca del umbral regulatorio</em> (típicamente FP ≥ 0.97, tan φ ≤ 0.25).</p>
+        <div style="margin-top:.875rem;">
+          <div class="progress-row">
+            <span class="progress-label">FP = 0.965</span>
+            <div class="progress-track"><div class="progress-fill" style="width:96.5%;background:var(--blue);"></div></div>
+            <span class="progress-val">96.5%</span>
+          </div>
+          <div style="margin-top:.75rem;">
+            <span class="badge badge-green">✓ Aceptable</span>
+            <span style="font-size:13px;color:var(--gray-500);margin-left:.5rem;">Monitorear para no bajar de 0.97</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <p style="font-size:13px;"><strong>Total energía reactiva:</strong> 1.261 GVArh acumulados en el período. Para cada 100 kWh activos se consumen 27 kVArh reactivos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. EMPRESA 2 -->
+  <section id="empresa2">
+    <div class="section-header">
+      <div class="section-num">Sección 3</div>
+      <h2>Curva de demanda — Empresa 2</h2>
+    </div>
+
+    <div class="company-header">
+      <div class="company-dot" style="background:var(--red);"></div>
+      <div>
+        <div class="company-title">Medidor 2 · Empresa 2</div>
+        <div class="company-sub">Perfil: carga semiturnada / mixta con proceso nocturno</div>
+      </div>
+      <span class="badge badge-red" style="margin-left:auto;">Alta variabilidad</span>
+    </div>
+
+    <!-- Métricas E2 -->
+    <div class="grid-6" style="margin-bottom:1.5rem;">
+      <div class="metric red">
+        <div class="metric-label">Consumo promedio</div>
+        <div class="metric-value">604.6</div>
+        <div class="metric-sub">kWh/hora</div>
+      </div>
+      <div class="metric red">
+        <div class="metric-label">Consumo máximo</div>
+        <div class="metric-value">1 380</div>
+        <div class="metric-sub">kWh registrado</div>
+      </div>
+      <div class="metric red">
+        <div class="metric-label">Total acumulado</div>
+        <div class="metric-value">5.75</div>
+        <div class="metric-sub">GWh (2012–2013)</div>
+      </div>
+      <div class="metric amber">
+        <div class="metric-label">Factor de carga</div>
+        <div class="metric-value">0.438</div>
+        <div class="metric-sub">FC = D̄ / D_max</div>
+      </div>
+      <div class="metric amber">
+        <div class="metric-label">Coef. variación</div>
+        <div class="metric-value">0.549</div>
+        <div class="metric-sub">Relativo / global</div>
+      </div>
+      <div class="metric amber">
+        <div class="metric-label">Factor de potencia</div>
+        <div class="metric-value">0.940</div>
+        <div class="metric-sub">tan φ = 0.36</div>
+      </div>
+    </div>
+
+    <!-- Gráfico E2 -->
+    <div class="card">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('e2','curva')">Curva horaria media</button>
+        <button class="tab-btn" onclick="switchTab('e2','banda')">Banda de incertidumbre</button>
+        <button class="tab-btn" onclick="switchTab('e2','anual')">Comparativa anual</button>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626;"></div>Media horaria (D̄)</div>
+        <div class="legend-item" id="leg-e2-std" style="display:none;"><div class="legend-dot" style="background:#fecaca;border:1px dashed #dc2626;"></div>Banda ±1σ</div>
+        <div class="legend-item" id="leg-e2-2013" style="display:none;"><div class="legend-dot" style="background:#dc2626;"></div>Año 2013</div>
+        <div class="legend-item" id="leg-e2-2012" style="display:none;"><div class="legend-dot" style="background:#f87171;border:2px dashed;"></div>Año 2012</div>
+      </div>
+      <div id="e2-curva" class="tab-pane active">
+        <div class="chart-container" style="height:300px;"><canvas id="chartE2Curva" role="img" aria-label="Curva de demanda horaria media Empresa 2"></canvas></div>
+      </div>
+      <div id="e2-banda" class="tab-pane">
+        <div class="chart-container" style="height:300px;"><canvas id="chartE2Banda" role="img" aria-label="Banda de incertidumbre ±1σ Empresa 2"></canvas></div>
+      </div>
+      <div id="e2-anual" class="tab-pane">
+        <div class="chart-container" style="height:300px;"><canvas id="chartE2Anual" role="img" aria-label="Comparativa curva horaria 2012 vs 2013 Empresa 2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1.25rem;">
+      <div class="card card-sm">
+        <h3>Características del perfil de carga</h3>
+        <p>La curva de Empresa 2 presenta una <strong>rampa ascendente</strong> desde las 6h, con el pico en las 15h (632 kWh) y un descenso gradual en la tarde-noche. La diferencia pico-valle es de solo <strong>9.9 %</strong>, pero eso se debe a que la demanda nocturna es llamativamente alta (~578 kWh), lo que sugiere un <em>proceso nocturno parcial o turno nocturno</em> superpuesto sobre la operación diurna principal.</p>
+        <table style="margin-top:.5rem;width:100%;font-size:13px;">
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Hora pico</td><td style="text-align:right;font-weight:600;">15:00 h → 632.3 kWh</td></tr>
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Hora valle</td><td style="text-align:right;font-weight:600;">05:00 h → 570.0 kWh</td></tr>
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Relación pico/valle</td><td style="text-align:right;font-weight:600;">+9.9 %</td></tr>
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Registros en cero</td><td style="text-align:right;font-weight:600;">33 horas (más paradas)</td></tr>
+        </table>
+      </div>
+      <div class="card card-sm">
+        <h3>Problema de energía reactiva</h3>
+        <p>El <strong>FP = 0.940</strong> con tan(φ) = 0.36 indica que por cada 100 kWh activos se consumen <strong>36 kVArh reactivos</strong>. Esto está por encima del umbral regulatorio típico (FP ≥ 0.97).</p>
+        <div style="margin-top:.875rem;">
+          <div class="progress-row">
+            <span class="progress-label">FP = 0.940</span>
+            <div class="progress-track"><div class="progress-fill" style="width:94%;background:var(--red);"></div></div>
+            <span class="progress-val">94.0%</span>
+          </div>
+          <div style="margin-top:.75rem;">
+            <span class="badge badge-red">⚠ Fuera de rango</span>
+            <span style="font-size:13px;color:var(--gray-500);margin-left:.5rem;">Riesgo de penalización tarifaria</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="alert alert-amber" style="font-size:13px;">
+          <span class="alert-icon">⚠</span>
+          <div><strong>Recomendación:</strong> Evaluar instalación de banco de condensadores automático para corregir el factor de potencia y evitar cargos adicionales en la factura eléctrica.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. COMPARATIVA -->
+  <section id="comparativa">
+    <div class="section-header">
+      <div class="section-num">Sección 4</div>
+      <h2>Análisis comparativo</h2>
+    </div>
+
+    <!-- Gráfico comparativo superpuesto -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('comp','superp')">Curvas superpuestas</button>
+        <button class="tab-btn" onclick="switchTab('comp','monthly')">Variación mensual</button>
+        <button class="tab-btn" onclick="switchTab('comp','scatter')">Dispersión (correlación)</button>
+        <button class="tab-btn" onclick="switchTab('comp','cv')">Incertidumbre por hora</button>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div>Empresa 1 (M1)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626;"></div>Empresa 2 (M2)</div>
+      </div>
+      <div id="comp-superp" class="tab-pane active"><div class="chart-container" style="height:320px;"><canvas id="chartCompSuperp" role="img" aria-label="Curvas de demanda superpuestas Empresa 1 vs 2"></canvas></div></div>
+      <div id="comp-monthly" class="tab-pane"><div class="chart-container" style="height:320px;"><canvas id="chartCompMonthly" role="img" aria-label="Demanda promedio mensual Empresa 1 vs 2"></canvas></div></div>
+      <div id="comp-scatter" class="tab-pane"><div class="chart-container" style="height:320px;"><canvas id="chartCompScatter" role="img" aria-label="Diagrama de dispersión demanda E1 vs E2"></canvas></div></div>
+      <div id="comp-cv" class="tab-pane"><div class="chart-container" style="height:320px;"><canvas id="chartCompCV" role="img" aria-label="Coeficiente de variación horario ambas empresas"></canvas></div></div>
+    </div>
+
+    <!-- Tabla comparativa -->
+    <div class="card">
+      <h3>Tabla comparativa de indicadores</h3>
+      <div class="table-wrap" style="margin-top:1rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Indicador</th>
+              <th style="text-align:right;color:#2563eb;">Empresa 1 (M1)</th>
+              <th style="text-align:right;color:#dc2626;">Empresa 2 (M2)</th>
+              <th>Interpretación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="td-label">Consumo promedio (kWh/h)</td><td class="td-num">490.8</td><td class="td-num">604.6</td><td style="font-size:13px;color:var(--gray-500);">M2 consume 23% más en promedio</td></tr>
+            <tr><td class="td-label">Consumo máximo (kWh)</td><td class="td-num">1 040.0</td><td class="td-num">1 380.0</td><td style="font-size:13px;color:var(--gray-500);">M2 tiene picos 33% más altos</td></tr>
+            <tr><td class="td-label">Total acumulado (GWh)</td><td class="td-num">4.664</td><td class="td-num">5.746</td><td style="font-size:13px;color:var(--gray-500);">Diferencia de 1.08 GWh en el período</td></tr>
+            <tr><td class="td-label">Factor de carga (FC)</td><td class="td-num">0.472</td><td class="td-num">0.438</td><td style="font-size:13px;color:var(--gray-500);">M1 usa mejor su capacidad contratada</td></tr>
+            <tr><td class="td-label">Coef. de variación global</td><td class="td-num">0.511</td><td class="td-num">0.549</td><td style="font-size:13px;color:var(--gray-500);">M2 es menos predecible</td></tr>
+            <tr><td class="td-label">Relación pico-valle (%)</td><td class="td-num">14.4%</td><td class="td-num">9.9%</td><td style="font-size:13px;color:var(--gray-500);">Ambas tienen perfil casi plano</td></tr>
+            <tr><td class="td-label">Factor de potencia</td><td class="td-num">0.965</td><td class="td-num">0.940</td><td style="font-size:13px;color:var(--gray-500);">M2 tiene mayor consumo reactivo</td></tr>
+            <tr><td class="td-label">Energía reactiva (GVArh)</td><td class="td-num">1.261</td><td class="td-num">2.094</td><td style="font-size:13px;color:var(--gray-500);">M2 consume 66% más reactivos</td></tr>
+            <tr><td class="td-label">Horas en cero (paradas)</td><td class="td-num">22 h</td><td class="td-num">33 h</td><td style="font-size:13px;color:var(--gray-500);">M2 tiene más interrupciones</td></tr>
+            <tr class="highlight-blue"><td class="td-label" style="font-weight:600;">Hora pico</td><td class="td-num" style="font-weight:600;">11:00 h</td><td class="td-num" style="font-weight:600;">15:00 h</td><td style="font-size:13px;color:var(--gray-500);">Los picos no coinciden → menor impacto en red</td></tr>
+            <tr><td class="td-label" style="font-weight:600;">Correlación Pearson (r)</td><td class="td-num" colspan="2" style="text-align:center;font-weight:700;font-size:15px;">0.758</td><td style="font-size:13px;color:var(--gray-500);">Correlación moderada-alta: factor externo común</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Correlación explicación -->
+    <div class="card card-sm" style="margin-top:1.25rem;">
+      <h3>Interpretación de la correlación (r = 0.758)</h3>
+      <p>Una correlación de Pearson de <strong>r = 0.758</strong> indica una relación <em>moderada-alta</em> entre las demandas de ambas empresas. Esto sugiere que comparten un <strong>factor externo común</strong> —probablemente el calendario laboral (días hábiles vs. festivos)— que afecta a las dos simultáneamente. Sin embargo, la correlación no es perfecta (r = 1), lo que confirma que sus procesos productivos tienen una <strong>componente independiente</strong>. Una consecuencia favorable para el sistema eléctrico es que, al tener horas pico diferentes (11h vs. 15h), la coincidencia de sus máximas demandas en el mismo instante no está garantizada, lo que reduce el impacto combinado sobre la red.</p>
+    </div>
+  </section>
+
+  <!-- 5. IMPRECISIONES -->
+  <section id="imprecisiones">
+    <div class="section-header">
+      <div class="section-num">Sección 5</div>
+      <h2>Análisis de imprecisiones en la estimación</h2>
+    </div>
+
+    <p>La curva de demanda estimada mediante la media horaria anual es una <strong>aproximación estadística</strong>, no una predicción exacta. A continuación se identifican y cuantifican las principales fuentes de imprecisión.</p>
+
+    <div class="grid-2">
+      <div class="card card-sm">
+        <h3>Fuente 1 — Alta variabilidad intrínseca</h3>
+        <div class="alert alert-amber" style="margin-bottom:.875rem;">
+          <span class="alert-icon">⚠</span>
+          <div><strong>CV &gt; 0.50 en ambas empresas.</strong> La desviación estándar de ~250 kWh (M1) y ~330 kWh (M2) supera el 50% de la media. El día real puede diferir de la curva estimada en ±250–330 kWh sistemáticamente.</div>
+        </div>
+        <table style="font-size:13px;">
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Error típico M1</td><td style="text-align:right;font-weight:600;">±251 kWh/h</td></tr>
+          <tr><td style="color:var(--gray-500);padding:3px 0;">Error típico M2</td><td style="text-align:right;font-weight:600;">±332 kWh/h</td></tr>
+        </table>
+      </div>
+      <div class="card card-sm">
+        <h3>Fuente 2 — Mezcla de tipos de día</h3>
+        <p style="font-size:13px;">El promedio incluye días laborales, sábados, domingos y festivos en el mismo cálculo. Un día laboral típico tiene demanda sensiblemente mayor que un festivo, por lo que la media tiende a <em>subestimar los días laborales y sobreestimar los festivos</em>.</p>
+        <div class="alert alert-blue" style="font-size:13px;">
+          <span class="alert-icon">→</span>
+          <div><strong>Mejora:</strong> Calcular curvas separadas por tipo de día (laboral / sábado / festivo).</div>
+        </div>
+      </div>
+      <div class="card card-sm">
+        <h3>Fuente 3 — Estacionalidad anual</h3>
+        <p style="font-size:13px;">Existe una variación mensual pronunciada. En M1, el promedio de octubre 2012 (665 kWh) vs. enero 2013 (379 kWh) representa una diferencia del <strong>75.5%</strong>. En M2, el máximo es febrero 2013 (822 kWh) y el mínimo junio 2013 (471 kWh), diferencia del <strong>74.5%</strong>.</p>
+        <div class="alert alert-blue" style="font-size:13px;">
+          <span class="alert-icon">→</span>
+          <div><strong>Mejora:</strong> Desagregar por mes o trimestre para capturar la estacionalidad.</div>
+        </div>
+      </div>
+      <div class="card card-sm">
+        <h3>Fuente 4 — Registros en cero</h3>
+        <p style="font-size:13px;">M1 tiene 22 horas con consumo cero y M2 tiene 33 horas. Estos valores corresponden a paradas no programadas, mantenimientos o fallas de medición. Al incluirlos en el promedio, <em>la media se reduce artificialmente</em>, subestimando el consumo real en operación normal.</p>
+        <div class="alert alert-blue" style="font-size:13px;">
+          <span class="alert-icon">→</span>
+          <div><strong>Mejora:</strong> Excluir los registros en cero del cálculo de la media o tratarlos como datos faltantes (imputación).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico variabilidad mensual -->
+    <div class="card" style="margin-top:1.25rem;">
+      <h3>Variabilidad mensual — promedio y rango</h3>
+      <div class="legend" style="margin-top:.5rem;">
+        <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div>Empresa 1</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626;"></div>Empresa 2</div>
+      </div>
+      <div class="chart-container" style="height:280px;"><canvas id="chartMonthly2" role="img" aria-label="Variación mensual del consumo promedio por empresa"></canvas></div>
+    </div>
+
+    <!-- Resumen de incertidumbre -->
+    <div class="card" style="margin-top:1.25rem;">
+      <h3>Resumen cuantitativo de la incertidumbre</h3>
+      <div class="table-wrap" style="margin-top:.875rem;">
+        <table>
+          <thead>
+            <tr><th>Métrica de incertidumbre</th><th style="text-align:right;">Empresa 1</th><th style="text-align:right;">Empresa 2</th><th>Significado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="td-label">Desv. estándar global</td><td class="td-num">251 kWh</td><td class="td-num">332 kWh</td><td style="font-size:13px;color:var(--gray-500);">Dispersión absoluta de un registro individual respecto a la media</td></tr>
+            <tr><td class="td-label">Coef. variación (CV)</td><td class="td-num">0.511</td><td class="td-num">0.549</td><td style="font-size:13px;color:var(--gray-500);">Dispersión relativa: &gt;0.5 = alta variabilidad</td></tr>
+            <tr><td class="td-label">CV mínimo (por hora)</td><td class="td-num">0.462 (h=4)</td><td class="td-num">0.511 (h=6)</td><td style="font-size:13px;color:var(--gray-500);">Hora más predecible del día</td></tr>
+            <tr><td class="td-label">CV máximo (por hora)</td><td class="td-num">0.525 (h=6)</td><td class="td-num">0.579 (h=1)</td><td style="font-size:13px;color:var(--gray-500);">Hora menos predecible del día</td></tr>
+            <tr><td class="td-label">Rango mensual</td><td class="td-num">379–665 kWh</td><td class="td-num">471–822 kWh</td><td style="font-size:13px;color:var(--gray-500);">Amplitud de la estacionalidad anual</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. CONCLUSIONES -->
+  <section id="conclusiones">
+    <div class="section-header">
+      <div class="section-num">Sección 6</div>
+      <h2>Conclusiones y recomendaciones</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-top: 3px solid var(--blue);">
+        <div class="company-header" style="margin-bottom:1rem;">
+          <div class="company-dot" style="background:var(--blue);"></div>
+          <div class="company-title">Empresa 1</div>
+          <span class="badge badge-blue">Industrial continua</span>
+        </div>
+        <p>La curva de demanda de la Empresa 1 corresponde a un <strong>proceso industrial de base continua</strong>, probablemente en turnos de 24 horas. La carga es estable (pico-valle 14.4%), el factor de potencia es bueno (0.965) y la predictibilidad es mayor que la de su contraparte.</p>
+        <p>El factor de carga de 0.472 indica que existe margen para optimizar la gestión de carga: los picos puntuales en horario de mañana duplican el consumo promedio, lo que implica que la potencia contratada debe dimensionarse holgadamente respecto al promedio.</p>
+        <div class="alert alert-green" style="margin-top:.875rem;">
+          <span class="alert-icon">✓</span>
+          <div>Perfil <strong>favorable para el operador de red</strong>: carga predecible, baja variabilidad nocturna y factor de potencia aceptable. Monitorear para mantener FP ≥ 0.97.</div>
+        </div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--red);">
+        <div class="company-header" style="margin-bottom:1rem;">
+          <div class="company-dot" style="background:var(--red);"></div>
+          <div class="company-title">Empresa 2</div>
+          <span class="badge badge-red">Mixta / mayor riesgo</span>
+        </div>
+        <p>La Empresa 2 es la <strong>mayor consumidora</strong> del sistema (5.75 GWh vs. 4.66 GWh) y presenta mayor variabilidad e incertidumbre. El factor de potencia de 0.940 requiere atención inmediata, ya que genera un exceso de energía reactiva de 2.09 GVArh.</p>
+        <p>El perfil con alta demanda nocturna (~578 kWh) y pico en la tarde (15h) dificulta la clasificación como cliente puramente comercial; puede tratarse de una empresa con producción principal diurna y un proceso auxiliar nocturno.</p>
+        <div class="alert alert-red" style="margin-top:.875rem;">
+          <span class="alert-icon">⚠</span>
+          <div>Requiere <strong>banco de condensadores</strong> para corrección de FP y <strong>contrato de energía flexible</strong> que contemple la alta variabilidad y los picos de 1 380 kWh.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.25rem;">
+      <h3>Recomendaciones técnicas generales</h3>
+      <div class="grid-3" style="margin-top:1rem;">
+        <div style="display:flex;gap:.75rem;">
+          <div style="width:36px;height:36px;background:var(--blue-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">📊</div>
+          <div><div style="font-weight:600;font-size:14px;color:var(--gray-900);margin-bottom:.25rem;">Desagregar por tipo de día</div><div style="font-size:13px;color:var(--gray-600);">Calcular curvas separadas para días laborales, sábados y festivos para reducir el CV de estimación.</div></div>
+        </div>
+        <div style="display:flex;gap:.75rem;">
+          <div style="width:36px;height:36px;background:var(--green-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">📅</div>
+          <div><div style="font-weight:600;font-size:14px;color:var(--gray-900);margin-bottom:.25rem;">Análisis por temporada</div><div style="font-size:13px;color:var(--gray-600);">Separar meses de alta y baja demanda para construir curvas estacionales más precisas.</div></div>
+        </div>
+        <div style="display:flex;gap:.75rem;">
+          <div style="width:36px;height:36px;background:var(--amber-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">⚡</div>
+          <div><div style="font-weight:600;font-size:14px;color:var(--gray-900);margin-bottom:.25rem;">Corrección de FP — M2</div><div style="font-size:13px;color:var(--gray-600);">Instalar banco de condensadores automático para elevar FP ≥ 0.97 y evitar penalizaciones en la tarifa.</div></div>
+        </div>
+        <div style="display:flex;gap:.75rem;">
+          <div style="width:36px;height:36px;background:var(--red-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">🔍</div>
+          <div><div style="font-weight:600;font-size:14px;color:var(--gray-900);margin-bottom:.25rem;">Investigar ceros en M2</div><div style="font-size:13px;color:var(--gray-600);">Las 33 horas en cero de M2 merecen revisión: pueden ser fallas de medición o paradas no reportadas.</div></div>
+        </div>
+        <div style="display:flex;gap:.75rem;">
+          <div style="width:36px;height:36px;background:var(--purple-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">📈</div>
+          <div><div style="font-weight:600;font-size:14px;color:var(--gray-900);margin-bottom:.25rem;">Ampliar el período de datos</div><div style="font-size:13px;color:var(--gray-600);">Con solo 13 meses, la curva puede estar sesgada por eventos atípicos. Más datos reducen el CV.</div></div>
+        </div>
+        <div style="display:flex;gap:.75rem;">
+          <div style="width:36px;height:36px;background:var(--blue-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">🤝</div>
+          <div><div style="font-weight:600;font-size:14px;color:var(--gray-900);margin-bottom:.25rem;">Tarifa diferenciada por horario</div><div style="font-size:13px;color:var(--gray-600);">Dado que los picos de M1 (11h) y M2 (15h) no coinciden, se podría negociar un contrato conjunto con descuento por diversidad de carga.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page -->
+
+<footer>
+  Análisis de curvas de demanda eléctrica · Datos: Oct 2012 – Oct 2013 · 9 504 registros horarios · Dos medidores (kWh activa + kVArh reactiva)
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const D = {
+  hM1:[470.418,472.547,474.725,476.503,478.434,450.974,470.73,507.944,513.22,516.275,524.907,527.061,521.11,512.895,524.292,524.317,502.486,481.294,477.621,475.402,470.568,468.632,468.35,468.119],
+  hM2:[583.918,578.652,575.515,575.449,577.475,570.048,587.363,587.732,603.921,617.907,625.837,629.502,628.084,619.913,621.136,632.349,629.104,623.15,625.977,621.645,608.914,599.261,596.323,590.105],
+  sM1:[236.046,235.937,236.872,233.086,221.214,229.728,247.096,264.675,267.109,267.505,271.463,273.988,270.773,266.607,272.136,273.846,259.207,246.066,240.197,237.893,235.699,234.373,234.422,234.981],
+  sM2:[332.717,332.035,332.822,325.571,318.267,307.428,311.585,316.677,324.623,330.034,335.335,336.642,337.054,336.196,335.814,340.68,339.392,337.945,338.102,340.747,336.479,334.282,335.051,334.429],
+  cvM1:[0.5018,0.4993,0.499,0.4892,0.4624,0.5094,0.5249,0.5211,0.5205,0.5181,0.5172,0.5198,0.5196,0.5198,0.5191,0.5223,0.5158,0.5113,0.5029,0.5004,0.5009,0.5001,0.5005,0.502],
+  cvM2:[0.5698,0.5738,0.5783,0.5658,0.5511,0.5393,0.5305,0.5388,0.5375,0.5341,0.5358,0.5348,0.5366,0.5423,0.5406,0.5388,0.5395,0.5423,0.5401,0.5481,0.5526,0.5578,0.5619,0.5667],
+  monLab:["Oct 12","Nov 12","Dic 12","Ene 13","Feb 13","Mar 13","Abr 13","May 13","Jun 13","Jul 13","Ago 13","Sep 13","Oct 13"],
+  monM1:[664.867,509.561,474.302,379.355,611.417,486.723,512.203,454.798,444.998,452.158,382.346,472.959,545.428],
+  monM2:[611.756,631.206,703.241,514.287,822.183,577.173,705.655,651.543,471.028,563.934,508.539,549.353,568.39],
+  h12M1:[535.775,536.761,537.095,537.188,535.926,508.974,533.205,571.662,576.388,574.812,580.296,584.067,581.984,573.142,582.959,582.161,566.017,540.479,531.857,533.083,523.24,520.874,526.05,526.286],
+  h12M2:[631.63,623.424,622.289,633.544,615.064,619.877,621.062,628.221,659.528,677.038,676.166,673.952,677.353,665.573,667.03,668.26,660.338,663.086,659.574,657.994,646.494,646.548,641.941,638.212],
+  h13M1:[450.639,453.114,455.849,458.138,461.035,433.421,451.823,488.661,494.104,498.56,508.144,509.809,502.688,494.663,506.537,506.812,483.259,463.382,461.207,457.946,454.627,452.822,450.888,450.516],
+  h13M2:[569.479,565.103,561.359,557.868,566.1,554.968,577.164,575.479,587.092,600.012,610.607,616.05,613.174,606.095,607.247,621.482,619.652,611.064,615.809,610.644,597.541,584.951,582.517,575.546],
+  scatter:[[454.487,181.374],[843.17,549.006],[847.69,880.896],[731.266,875.79],[831.058,902.874],[792.009,897.546],[800.686,767.232],[951.459,888.444],[854.017,778.776],[790.201,785.214],[846.063,713.952],[859.079,604.284],[806.29,702.63],[903.19,887.334],[799.601,668.886],[842.989,682.428],[827.442,700.41],[777.727,754.134],[811.533,600.066],[497.152,194.028],[491.909,194.028],[521.739,194.25],[834.493,798.312],[852.209,812.52],[792.551,873.348],[893.608,941.28],[946.397,896.658],[899.936,901.764],[1003.163,966.81],[994.485,889.332],[905.179,843.6],[995.208,827.838],[1011.298,875.124],[849.317,727.272],[963.029,867.132],[989.423,856.032],[867.757,555.222],[933.742,520.59],[819.668,360.972],[793.093,361.86],[296.303,169.386],[316.731,189.588],[302.449,204.906],[278.948,161.394],[272.62,131.424],[245.141,175.158],[689.686,613.164],[774.111,993.672],[709.933,894.882],[770.676,1141.968],[766.699,938.838],[622.073,844.488],[782.246,922.188],[703.064,850.482],[663.472,949.938],[848.774,615.606],[723.673,483.294],[41.942,48.84],[26.937,32.856],[28.744,39.96],[36.699,50.616],[21.332,44.622],[21.694,45.954],[350.718,65.268],[789.658,667.776],[881.496,558.774],[767.965,490.842],[836.662,696.858],[765.434,610.5],[707.041,492.174],[815.691,815.85],[736.328,750.138],[657.687,844.932],[730.0,909.756],[654.795,699.744],[635.27,754.134],[738.497,834.942],[710.476,756.576],[682.997,767.676],[658.772,770.562],[538.371,647.352],[461.9,463.314],[42.484,19.536],[143.361,57.276],[176.805,86.358],[656.602,553.002],[751.152,686.646],[806.833,711.732],[898.128,793.206],[837.927,665.556],[831.6,739.704],[860.164,805.638],[771.399,765.456],[720.419,628.926],[720.238,533.91],[756.937,740.148],[751.333,717.726],[828.707,777.888],[775.919,850.704],[810.991,719.502],[697.459,525.252]]
+};
+const HOURS = Array.from({length:24},(_,i)=>i+'h');
+const BLUE='#2563eb', RED='#dc2626', BLUE_A='rgba(37,99,235,0.12)', RED_A='rgba(220,38,38,0.12)';
+const TICK={color:'#9ca3af',font:{size:11}};
+const GRID={color:'rgba(0,0,0,0.05)'};
+const BASE_OPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:TICK,grid:GRID},y:{ticks:TICK,grid:GRID}}};
+
+function merge(a,b){return Object.assign({},a,b);}
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+
+// E1 curva
+new Chart(document.getElementById('chartE1Curva'),{type:'line',data:{labels:HOURS,datasets:[{data:D.hM1,borderColor:BLUE,backgroundColor:BLUE_A,fill:true,tension:0.35,pointRadius:2,pointHoverRadius:5,label:'M1'}]},options:BASE_OPTS});
+
+// E1 banda
+new Chart(document.getElementById('chartE1Banda'),{type:'line',data:{labels:HOURS,datasets:[
+  {data:D.hM1.map((v,i)=>v+D.sM1[i]),borderColor:'rgba(37,99,235,0.3)',backgroundColor:'rgba(37,99,235,0.08)',fill:'+1',tension:0.35,pointRadius:0,borderDash:[4,3],label:'Mean+σ'},
+  {data:D.hM1.map((v,i)=>v-D.sM1[i]),borderColor:'rgba(37,99,235,0.3)',backgroundColor:'rgba(37,99,235,0.08)',fill:false,tension:0.35,pointRadius:0,borderDash:[4,3],label:'Mean-σ'},
+  {data:D.hM1,borderColor:BLUE,backgroundColor:'transparent',fill:false,tension:0.35,pointRadius:2,pointHoverRadius:5,label:'Media'},
+]},options:BASE_OPTS});
+
+// E1 anual
+new Chart(document.getElementById('chartE1Anual'),{type:'line',data:{labels:HOURS,datasets:[
+  {data:D.h12M1,borderColor:BLUE,borderDash:[5,4],backgroundColor:'transparent',fill:false,tension:0.35,pointRadius:2,label:'2012'},
+  {data:D.h13M1,borderColor:'#7c3aed',backgroundColor:'transparent',fill:false,tension:0.35,pointRadius:2,label:'2013'},
+]},options:BASE_OPTS});
+
+// E2 curva
+new Chart(document.getElementById('chartE2Curva'),{type:'line',data:{labels:HOURS,datasets:[{data:D.hM2,borderColor:RED,backgroundColor:RED_A,fill:true,tension:0.35,pointRadius:2,pointHoverRadius:5,label:'M2'}]},options:BASE_OPTS});
+
+// E2 banda
+new Chart(document.getElementById('chartE2Banda'),{type:'line',data:{labels:HOURS,datasets:[
+  {data:D.hM2.map((v,i)=>v+D.sM2[i]),borderColor:'rgba(220,38,38,0.3)',backgroundColor:'rgba(220,38,38,0.08)',fill:'+1',tension:0.35,pointRadius:0,borderDash:[4,3],label:'Mean+σ'},
+  {data:D.hM2.map((v,i)=>v-D.sM2[i]),borderColor:'rgba(220,38,38,0.3)',backgroundColor:'rgba(220,38,38,0.08)',fill:false,tension:0.35,pointRadius:0,borderDash:[4,3],label:'Mean-σ'},
+  {data:D.hM2,borderColor:RED,backgroundColor:'transparent',fill:false,tension:0.35,pointRadius:2,pointHoverRadius:5,label:'Media'},
+]},options:BASE_OPTS});
+
+// E2 anual
+new Chart(document.getElementById('chartE2Anual'),{type:'line',data:{labels:HOURS,datasets:[
+  {data:D.h12M2,borderColor:'#f87171',borderDash:[5,4],backgroundColor:'transparent',fill:false,tension:0.35,pointRadius:2,label:'2012'},
+  {data:D.h13M2,borderColor:RED,backgroundColor:'transparent',fill:false,tension:0.35,pointRadius:2,label:'2013'},
+]},options:BASE_OPTS});
+
+// Comparativa superpuesta
+new Chart(document.getElementById('chartCompSuperp'),{type:'line',data:{labels:HOURS,datasets:[
+  {data:D.hM1,borderColor:BLUE,backgroundColor:BLUE_A,fill:true,tension:0.35,pointRadius:2,label:'M1'},
+  {data:D.hM2,borderColor:RED,backgroundColor:RED_A,fill:true,tension:0.35,pointRadius:2,borderDash:[5,4],label:'M2'},
+]},options:BASE_OPTS});
+
+// Comparativa mensual
+new Chart(document.getElementById('chartCompMonthly'),{type:'bar',data:{labels:D.monLab,datasets:[
+  {data:D.monM1,backgroundColor:BLUE+'cc',label:'M1'},
+  {data:D.monM2,backgroundColor:RED+'cc',label:'M2'},
+]},options:merge(BASE_OPTS,{scales:{x:{ticks:{...TICK,maxRotation:45,autoSkip:false},grid:GRID},y:{ticks:TICK,grid:GRID}}})});
+
+// Scatter
+new Chart(document.getElementById('chartCompScatter'),{type:'scatter',data:{datasets:[{
+  data:D.scatter.map(p=>({x:p[0],y:p[1]})),
+  backgroundColor:BLUE+'55',pointRadius:4,pointHoverRadius:6,label:'Obs'
+}]},options:merge(BASE_OPTS,{scales:{
+  x:{title:{display:true,text:'kWh — Medidor 1',color:'#9ca3af',font:{size:11}},ticks:TICK,grid:GRID},
+  y:{title:{display:true,text:'kWh — Medidor 2',color:'#9ca3af',font:{size:11}},ticks:TICK,grid:GRID},
+}})});
+
+// CV
+new Chart(document.getElementById('chartCompCV'),{type:'line',data:{labels:HOURS,datasets:[
+  {data:D.cvM1,borderColor:BLUE,backgroundColor:BLUE_A,fill:true,tension:0.35,pointRadius:2,label:'CV M1'},
+  {data:D.cvM2,borderColor:RED,backgroundColor:RED_A,fill:true,tension:0.35,pointRadius:2,borderDash:[5,4],label:'CV M2'},
+]},options:merge(BASE_OPTS,{scales:{
+  x:{ticks:TICK,grid:GRID},
+  y:{ticks:{...TICK,callback:v=>v.toFixed(2)},grid:GRID},
+}})});
+
+// Monthly2
+new Chart(document.getElementById('chartMonthly2'),{type:'line',data:{labels:D.monLab,datasets:[
+  {data:D.monM1,borderColor:BLUE,backgroundColor:BLUE_A,fill:false,tension:0.3,pointRadius:4,pointHoverRadius:6,label:'M1'},
+  {data:D.monM2,borderColor:RED,backgroundColor:RED_A,fill:false,tension:0.3,pointRadius:4,pointHoverRadius:6,borderDash:[5,4],label:'M2'},
+]},options:merge(BASE_OPTS,{scales:{x:{ticks:{...TICK,maxRotation:45},grid:GRID},y:{ticks:TICK,grid:GRID}}})});
+
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(group, name) {
+  const sections = {
+    e1: ['curva','banda','anual'],
+    e2: ['curva','banda','anual'],
+    comp: ['superp','monthly','scatter','cv'],
+  };
+  const panes = sections[group];
+  panes.forEach(p => {
+    const el = document.getElementById(group+'-'+p);
+    if(el) el.classList.toggle('active', p===name);
+  });
+  // Sync buttons
+  const bar = document.querySelector(`[onclick*="switchTab('${group},'"]`)?.closest('.card, section');
+  document.querySelectorAll(`.tab-btn`).forEach(btn => {
+    if(btn.getAttribute('onclick') === `switchTab('${group}','${name}')`) {
+      btn.classList.add('active');
+    } else if(btn.getAttribute('onclick')?.startsWith(`switchTab('${group}'`)) {
+      btn.classList.remove('active');
+    }
+  });
+  // Toggle legend visibility for banda/anual
+  ['e1','e2'].forEach(g => {
+    const s = document.getElementById(`leg-${g}-std`);
+    const a2013 = document.getElementById(`leg-${g}-2013`);
+    const a2012 = document.getElementById(`leg-${g}-2012`);
+    if(group===g && s) {
+      s.style.display = name==='banda' ? '' : 'none';
+      if(a2013) a2013.style.display = name==='anual' ? '' : 'none';
+      if(a2012) a2012.style.display = name==='anual' ? '' : 'none';
+    }
+  });
+}
+
+// ── ACTIVE NAV ────────────────────────────────────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href')==='#'+e.target.id));
+    }
+  });
+},{threshold:0.3,rootMargin:'-60px 0px -60% 0px'});
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
