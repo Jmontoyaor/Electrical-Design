@@ -5,7 +5,9 @@ Portafolio de proyectos de ingeniería eléctrica, organizado en una carpeta por
 - [`distribution-systems/`](distribution-systems) — sistemas de distribución: el
   sistema eléctrico de un asentamiento en Manizales y una propuesta de
   subterranización para la ENEA.
-- [`power-transmission-systems/`](power-transmission-systems) — sistemas de transmisión eléctrica.
+- [`power-transmission-systems/`](power-transmission-systems) — sistemas de
+  transmisión eléctrica: diseño del sistema de puesta a tierra de una torre frente
+  a descargas atmosféricas (backflashover).
 - [`electrical-system-design-AUTOCAD/`](electrical-system-design-AUTOCAD) — diseño
   de sistemas eléctricos en AutoCAD.
 - [`electrical-substation/`](electrical-substation) — diseño de subestaciones

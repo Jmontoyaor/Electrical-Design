@@ -1,10 +1,8 @@
-# power-transmission
+# Power Transmission Systems
 
-> Carpeta reservada para el contenido de [`power-transmission`](https://github.com/Jmontoyaor/power-transmission).
-> Al anexarla (4 de octubre de 2026) ese repositorio estaba **vacío** (sin commits), por lo que no hay
-> archivos ni historial que traer todavía. Cuando se suba contenido al repositorio original, se puede
-> anexar con:
->
-> ```
-> git subtree add --prefix=power-transmission https://github.com/Jmontoyaor/power-transmission.git main
-> ```
+## Contenido
+
+- [`transmission-tower-grounding-grid/`](transmission-tower-grounding-grid) — diseño
+  de un sistema de puesta a tierra de alta frecuencia para una torre de una línea de
+  subtransmisión de 33 kV, orientado a evitar el backflashover ante descargas
+  atmosféricas (ATPDraw + IEEE Flash).
